@@ -1,0 +1,25 @@
+{
+  "name": "nexd",
+  "displayName": "Nexd",
+  "version": "0.1.0",
+  "description": "Create, preview, and publish rich media ads in Nexd Campaign Manager.",
+  "author": {
+    "name": "Nexd"
+  },
+  "license": "MIT",
+  "keywords": [
+    "advertising",
+    "rich-media",
+    "display-ads",
+    "interactive-ads",
+    "ad-creatives",
+    "ad-campaigns",
+    "ad-tags"
+  ],
+  "homepage": "https://cdn.nexd.com/dist/nexd-plugin/index.html",
+  "icon": "./assets/nexd.png",
+  "supportUrl": "https://support.nexd.com/en/articles/2111540-contacting-nexd-for-support",
+  "privacyPolicyUrl": "https://www.nexd.com/privacy-policy/",
+  "termsOfServiceUrl": "https://www.nexd.com/terms-conditions/",
+  "documentationUrl": "https://cdn.nexd.com/dist/nexd-plugin/index.html"
+}

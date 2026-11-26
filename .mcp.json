@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "nexd": {
+      "type": "http",
+      "url": "https://api.nexd.com/v3/mcp"
+    }
+  }
+}

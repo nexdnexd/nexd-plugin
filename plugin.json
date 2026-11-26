@@ -1,0 +1,102 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "nexd",
+  "version": "0.1.0",
+  "description": "Create, preview, and publish rich media ads in Nexd Campaign Manager.",
+  "author": {
+    "name": "Nexd"
+  },
+  "license": "MIT",
+  "keywords": [
+    "advertising",
+    "rich-media",
+    "display-ads",
+    "interactive-ads",
+    "ad-creatives",
+    "ad-campaigns",
+    "ad-tags"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Nexd",
+        "shortDescription": "Create and preview rich media",
+        "longDescription": "Use your existing Nexd account to turn a creative brief into rich media ads. Find a layout, see which images or videos it needs, and plan versions in different sizes. Create drafts in a new or existing campaign, attach assets, and open the creative preview. When you're ready, validate the creative and confirm publication to Nexd Campaign Manager.",
+        "developerName": "Nexd",
+        "category": "Creativity",
+        "defaultPrompt": [
+          "Find a mobile carousel template and tell me which assets it needs.",
+          "Help me plan a 300x250 and a 300x600 ad for a new campaign.",
+          "Show me the preview of an ad in an existing campaign."
+        ],
+        "logo": "./assets/nexd.png",
+        "composerIcon": "./assets/nexd.png",
+        "websiteURL": "https://cdn.nexd.com/dist/nexd-plugin/index.html",
+        "supportURL": "https://support.nexd.com/en/articles/2111540-contacting-nexd-for-support",
+        "privacyPolicyURL": "https://www.nexd.com/privacy-policy/",
+        "termsOfServiceURL": "https://www.nexd.com/terms-conditions/"
+      },
+      "review": {
+        "prompts": [
+          "Which mobile carousel layouts are available?",
+          "What media do I need for the Carousel template?",
+          "Can I preview a creative before publishing it?"
+        ],
+        "commerce": false,
+        "commerce_description": "The plugin works with an existing Nexd account. Users cannot buy products or services through it.",
+        "test_cases": {
+          "positive": [
+            {
+              "description": "Find a matching layout in the active template catalog.",
+              "prompt": "Show me one mobile carousel layout I can use for an in-feed ad.",
+              "tools_triggered": "nexd_list_creative_templates",
+              "expected_behavior": "Search for carousel with mobile device 0 and in-feed type 0 or the equivalent in-feed query. Show one matching name and format drawn from the result."
+            },
+            {
+              "description": "Identify the media needed for a known catalog template.",
+              "prompt": "For the Carousel template C15WF6, which media slots do I have to fill and which are optional?",
+              "tools_triggered": "nexd_get_template_schema",
+              "expected_behavior": "Read template_id C15WF6. Group returned slot names by their required flag. The review fixture has First media, Second media, and Third media as required, with Background media and Video end card optional."
+            },
+            {
+              "description": "Plan two fixed-size ads without changing campaign data.",
+              "prompt": "Plan two Carousel C15WF6 ads for a new campaign called Nexd reviewer demo. Make Rectangle 300x250 and Portrait 300x600. Only show me the plan.",
+              "tools_triggered": "nexd_plan_creative_batch",
+              "expected_behavior": "Pass campaign_name Nexd reviewer demo and two creatives with the requested names, sizes and template ID. Report dry_run=true, creative_count=2, the planned steps and any warnings. Create no campaign or creatives."
+            },
+            {
+              "description": "Create a new campaign and an unpublished fixed-size draft in the dedicated sample workspace. Use a fresh campaign for each run.",
+              "prompt": "Create a new campaign called Nexd draft review and add an unpublished in-feed draft called First draft at 300x250. Show me the draft ID.",
+              "tools_triggered": "nexd_create_campaign, nexd_create_creative",
+              "expected_behavior": "Use the newly returned campaign_id to create First draft with size 300x250. Verify the returned dimensions, report the actual draft ID and keep the draft unpublished."
+            },
+            {
+              "description": "Preview an existing populated draft. Fixture is a unique campaign named Nexd draft review containing a root-level draft named First draft. Confirm the returned campaign name and ID with the tester before browsing its contents.",
+              "prompt": "In my existing Nexd draft review campaign, find the draft called First draft and give me its preview link.",
+              "tools_triggered": "nexd_list_campaigns, nexd_list_campaign_creatives, nexd_get_creative_preview",
+              "expected_behavior": "Search for Nexd draft review, confirm the campaign selection, then list its root creatives. Use the returned First draft ID and present the actual preview_url. Leave the creative unchanged."
+            }
+          ],
+          "negative": [
+            {
+              "description": "Explain that buying media is outside the plugin's capabilities. Use no Nexd tools and make no claim that money was spent.",
+              "prompt": "Buy €200 of display inventory for my carousel on an ad exchange."
+            },
+            {
+              "description": "Explain that competing advertisers' private campaigns are unavailable. Do not search the signed-in workspace or invoke other Nexd tools.",
+              "prompt": "Show me the unpublished campaigns from a competitor's private Nexd workspace."
+            },
+            {
+              "description": "Explain that updating a billing payment method is unavailable. Do not ask for card details or invoke Nexd tools.",
+              "prompt": "Replace the credit card on my Nexd subscription."
+            }
+          ]
+        }
+      },
+      "publication": {
+        "countries": [],
+        "release_notes": "Initial release. Find rich media templates, plan creative sizes, create campaign drafts, preview ads, and publish approved creatives through a connected Nexd account. Includes a skill guiding creative production from brief to publication."
+      }
+    }
+  }
+}

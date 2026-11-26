@@ -1,10 +1,10 @@
 {
-  "name": "nexd",
-  "displayName": "Nexd",
+  "name": "NEXD",
+  "displayName": "NEXD",
   "version": "0.4.2",
   "description": "Create, preview, and publish rich media ads in Nexd Campaign Manager.",
   "author": {
-    "name": "Nexd"
+    "name": "Nexd Ads"
   },
   "license": "MIT",
   "keywords": [

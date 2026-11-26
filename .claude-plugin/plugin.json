@@ -1,7 +1,7 @@
 {
   "name": "nexd",
   "displayName": "Nexd",
-  "version": "0.1.0",
+  "version": "0.4.2",
   "description": "Create, preview, and publish rich media ads in Nexd Campaign Manager.",
   "author": {
     "name": "Nexd"

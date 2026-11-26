@@ -1,6 +1,6 @@
 ---
 name: create-creative
-description: Create, revise, preview, and prepare Nexd rich media ads from a brief using templates and source assets. Use for individual creatives and creative batches in Nexd Campaign Manager.
+description: Create, duplicate, revise, and preview Nexd rich media ads from a brief. Use for individual creatives, adding a CTA button to a draft, named copies, and batches of creative variants.
 ---
 
 # Create a Nexd creative
@@ -17,11 +17,23 @@ When work is scoped to an existing campaign or folder, use `nexd_list_campaign_c
 
 For a supplied creative ID, read its current state with `nexd_get_creative_state` before revising it. Retain the returned IDs for subsequent work.
 
+## Choose whether to create or duplicate
+
+- **Edit the existing ad** when the user asks for a revision to that creative.
+- **Duplicate an existing ad** when the user asks for a separate copy or a new version based on it. Make the requested changes on the copy.
+- **Build one per distinct design** when starting a batch from a brief. Group the requested ads by layout, size and shared artwork. Build the first ad in each group, wait for its assets to finish processing, then duplicate it for the remaining names. For example, six placements with the same artwork and different tracking URLs need one build and five copies. Apply and verify each placement's URLs on its own creative.
+
+Use `nexd_duplicate_creative` with one source ID and up to 20 names per call. Keep the returned IDs and follow each processing copy's `nexd_get_creative_duplication_status` action until it completes. Copies start in the source campaign. If the requested destination differs, move the completed copies with `nexd_move_creatives`.
+
 ## Choose the layout
 
-Search `nexd_list_creative_templates` using the requested layout or interaction. Read `nexd_get_template_schema` for a candidate before assigning media. Choose from its actual required slots, accepted media, format, and capabilities. A template can accept both images and video in the same slot.
+Search `nexd_list_creative_templates` using the requested layout or interaction. When the brief gives a goal, try Drag to Reveal for a before-and-after comparison, Carousel for product variants, or 3D Cube for several views of one product. Recommend a catalog match that fits the available artwork and requested placement.
+
+Read `nexd_get_template_schema` for a candidate before assigning media. Choose from its actual required slots, accepted media, format, and capabilities. A template can accept both images and video in the same slot.
 
 For additional carousel cards, check `capabilities.custom_feed_assets.supported`. Create each extra slot with `nexd_create_creative_asset_slot` using `type=feed`, then attach its source to the returned slot ID.
+
+For a pin that reveals media, use the [hotspot workflow](../manage-hotspots/SKILL.md) to choose the pin's scope, attach the content, and check how it opens and closes.
 
 ## Source and map media
 
@@ -42,9 +54,9 @@ When an upload result is unclear, search the personal library before uploading a
 
 ## Plan or create
 
-Use `nexd_plan_creative_batch` for a media plan or a request to plan several creatives. Include each requested name, size, layout, and available asset mapping. Present unresolved warnings and the proposed work. For a plan-only request, stop after returning the plan. Execute its write steps after the user approves them, reusing approval already given for the same plan.
+Use `nexd_plan_creative_batch` for a media plan or a request to plan several creatives. Include each requested name, size, layout, and available asset mapping. If the plan includes placement IDs or a tracker sheet, follow the [media-plan workflow](../traffic-media-plan/SKILL.md) to match those rows. The planner returns a create step for every row. When rows share a base creative, show which ad you will build or reuse and which rows you will fulfill by duplication. Present unresolved warnings and stop for a plan-only request. After approval, execute the approach shown to the user, reusing approval already given for that plan.
 
-Create authorized drafts with `nexd_create_creative`. For fixed-size infeed, explicitly pass the user's dimensions, or `size=300x250` if none were supplied. Check the returned dimensions and use `nexd_update_creative_size` to correct a mismatch before adding media. Follow the selected format's sizing rules for fullscreen and responsive creatives.
+For a draft built from scratch, use `nexd_create_creative`. For fixed-size infeed, explicitly pass the user's dimensions, or `size=300x250` if none were supplied. Check the returned dimensions and use `nexd_update_creative_size` to correct a mismatch before adding media. Follow the selected format's sizing rules for fullscreen and responsive creatives.
 
 Attach the selected template with `nexd_attach_creative_template` when the creative does not already have it. Use `nexd_add_creative_asset` with each returned target slot ID and its mapped original source. If the user requested initial placement, pass a nested `transform` using the schema's supported fields and omit `fit_type` and `crop_settings` for that attachment.
 
@@ -54,7 +66,9 @@ Keep IDs from successful steps when a later step fails. Read the current state o
 
 When crop state is `processing`, wait for the returned retry interval and follow the supplied `nexd_get_creative_asset_crop_status` action. Retry a status read when it is marked retryable. Continue dependent work only after `crop.state=completed`. Check progress through status reads. On a terminal failure, report the failed creative or asset and the returned reason before attempting a repair.
 
-Use the focused tools for revisions. Read `nexd_get_creative_options` before setting a returned option ID. Use `nexd_update_creative_asset_placement` for later framing, and `nexd_update_overlay_animation` with asset IDs from the creative state for animation changes. Attach media before reading `nexd_get_creative_cta` and applying click actions or tracking through their dedicated tools.
+When adding a visible CTA button, including in a follow-up edit, give it a gentle recurring scale pulse by default. Once the button is attached, follow the [overlay animation skill](../animate-overlays/SKILL.md) and apply the pulse to its asset ID with `nexd_update_overlay_animation` before preview. Include it in the proposal for plan-only requests. Honor explicit motion directions such as “static button” or “animate only the logo.” A request to change a URL or tracker on an existing button affects only that setting.
+
+Use the focused tools for revisions. Read `nexd_get_creative_options` before setting a returned option ID. Use `nexd_update_creative_asset_placement` for later framing. Attach media before reading `nexd_get_creative_cta` and applying click actions or tracking through their dedicated tools.
 
 Read the completed creative state and get `nexd_get_creative_preview`. Inspect `splash_url` for framing and placement when visual inspection is available. Otherwise return the URL and request visual feedback. Give the user the creative name, ID, actual size, preview URL, and any unresolved work.
 

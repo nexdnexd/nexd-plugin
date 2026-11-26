@@ -1,6 +1,6 @@
 # Nexd
 
-Create and preview rich media ads in Nexd Campaign Manager from Claude, ChatGPT, or Codex. The plugin connects your existing Nexd account and includes a skill for choosing layouts, mapping source media to template slots, planning sizes, creating drafts, and reviewing previews before publication.
+Create and preview rich media ads in Nexd Campaign Manager from Claude, ChatGPT, or Codex. Use the creative skill to choose layouts, map media to template slots, and review drafts. Use the media-plan skill to build placements, match trackers by placement ID, and flag gaps before publication.
 
 ## Get Started
 
@@ -9,8 +9,11 @@ Install the plugin and connect Nexd through the host application's connection se
 Try these prompts.
 
 - Find a mobile carousel template and tell me which assets it needs.
+- Plan a six-second ad where the CTA fades in once and then pulses gently. Show when each pulse ends.
+- Replace the image in the existing Size guide hotspot on my second carousel card and show me the preview.
 - Plan two carousel ads for a new Summer Launch campaign, at 300x250 and 300x600. Show me the plan first.
 - Show me the preview of a draft in my existing Summer Launch campaign.
+- Check my media plan against this tracker sheet and list the placements missing an impression or click tracker.
 
 ## Connection and Data
 

@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "nexd",
-  "version": "0.1.0",
+  "version": "0.4.2",
   "description": "Create, preview, and publish rich media ads in Nexd Campaign Manager.",
   "author": {
     "name": "Nexd"
@@ -21,7 +21,7 @@
       "interface": {
         "displayName": "Nexd",
         "shortDescription": "Create and preview rich media",
-        "longDescription": "Use your existing Nexd account to turn a creative brief into rich media ads. Find a layout, see which images or videos it needs, and plan versions in different sizes. Create drafts in a new or existing campaign, attach assets, and open the creative preview. When you're ready, validate the creative and confirm publication to Nexd Campaign Manager.",
+        "longDescription": "Use your existing Nexd account to turn a creative brief into rich media ads. Find a layout, see which images or videos it needs, and plan versions in different sizes. Build placements from a media plan, match trackers by placement ID, and check the saved tracking before publishing. Preview your drafts and confirm which creatives to publish to Nexd Campaign Manager.",
         "developerName": "Nexd",
         "category": "Creativity",
         "defaultPrompt": [
@@ -59,10 +59,58 @@
               "expected_behavior": "Read template_id C15WF6. Group returned slot names by their required flag. The review fixture has First media, Second media, and Third media as required, with Background media and Video end card optional."
             },
             {
+              "description": "Add a visible CTA in a follow-up edit. Use a fresh review draft with a rotating logo on a ten-second loop and an empty CTA overlay slot. Supply the draft ID and the original asset ID of the Book now button as prior context.",
+              "prompt": "Also add the Book now button to this draft, link it to https://shop.example/book and show me the preview.",
+              "tools_triggered": "nexd_get_creative_state, nexd_add_creative_asset, nexd_get_creative_cta, nexd_update_creative_click_action, nexd_get_creative_animations, nexd_update_overlay_animation, nexd_get_creative_preview",
+              "expected_behavior": "Attach and link the button, then apply a gentle recurring scale pulse to its returned creative asset ID on the existing loop. Verify the saved grow-and-return entries, the ten-second loop and the original logo rotation. Return the draft preview and the CTA timing."
+            },
+            {
+              "description": "Plan a global hotspot and account for a missing card-specific slot.",
+              "prompt": "Show me a plan only. One pin should open a size guide anywhere in my carousel ad. Another should open a care guide only on the second card. That card has no hotspot yet. What can you set up?",
+              "tools_triggered": "None",
+              "expected_behavior": "Plan the global size-guide pin and how to check it opens and closes across cards. Mark the card-two care guide as pending because MCP cannot create a hotspot bound to a card. Keep the answer in chat. A browser handoff, a global substitute for the care guide, or a write fails the case."
+            },
+            {
+              "description": "Update a named card hotspot in a review draft with an existing Care guide hotspot on card two. Supply the draft ID and replacement image's original asset ID as prior context.",
+              "prompt": "The hotspot on my second carousel card is called Care guide. Replace the image it opens with the one I supplied and give me the preview.",
+              "tools_triggered": "nexd_get_creative_state, nexd_add_creative_asset, nexd_get_creative_preview",
+              "expected_behavior": "Find the named hotspot in the draft and attach the image to its main slot ID. Preserve the card artwork, pin, and other hotspots. Follow crop status if processing, then return the playable preview for checking that the pin opens the new image and only appears on card two. Complete the edit in chat without creating another slot or suggesting a browser edit."
+            },
+            {
+              "description": "Edit one hotspot on a review draft. Supply its draft ID and complete current hotspots map as context. Use two named hotspots, Care guide and Size guide, with custom pin and close IDs. Care guide starts with Fade, video pausing on and Show close icon.",
+              "prompt": "Make the Care guide pin pulse. Let my video keep playing when I open it, and dim the background to 40% black. Show me the preview.",
+              "tools_triggered": "nexd_get_creative_state, nexd_get_creative_options, nexd_update_creative_settings, nexd_get_creative_preview",
+              "expected_behavior": "Send one hotspots settings update with the complete map. On the Care guide main slot set gesture_animation.type to pulse, pause_other_media to false, background_color to #000000 and background_alpha to 0.4 inside settings. Preserve Show close icon, both component IDs, other fields and the entire Size guide entry. Verify the response and return the playable preview."
+            },
+            {
+              "description": "Handle an existing two-pin draft when the fixture supplies only its draft ID and the compact state identifies both pins. The current hotspot settings map is unavailable.",
+              "prompt": "Make the Care guide pin static and keep it visible after I open it. Leave the other hotspot alone.",
+              "tools_triggered": "nexd_get_creative_state, nexd_get_creative_options",
+              "expected_behavior": "Explain that the requested settings are Pin animation None and Keep pin visible on. Leave the edit pending and ask for the current hotspot settings in chat. Do not infer the map from the asset list, send a partial write, edit the overlay timeline, or direct the user to Campaign Manager."
+            },
+            {
+              "description": "Plan a CTA entrance and two pulses on a shared timeline where the headline finishes later.",
+              "prompt": "Show me the animation plan only. Fade the CTA in once over the first 0.5 seconds. Give it two gentle scale pulses starting at 1.5 and 4.5 seconds. Each pulse takes 0.3 seconds to grow and 0.3 seconds to return to its original size. Start fading the headline out at 5.8 seconds and let its fade take 0.7 seconds. When does each overlay finish moving, and how long should the shared timeline be?",
+              "tools_triggered": "None",
+              "expected_behavior": "Plan one timeline iteration. The CTA fades in once, finishes its two grow-and-return pulses at 2.1 and 5.1 seconds, and stays visible at its original size. The headline finishes at 6.5 seconds (5.8 + 0.7), setting the minimum duration across both overlays. Accept a longer timeline with a stated hold, such as 7 seconds with a 0.5-second hold. Answer from the brief without calling Nexd tools."
+            },
+            {
               "description": "Plan two fixed-size ads without changing campaign data.",
               "prompt": "Plan two Carousel C15WF6 ads for a new campaign called Nexd reviewer demo. Make Rectangle 300x250 and Portrait 300x600. Only show me the plan.",
               "tools_triggered": "nexd_plan_creative_batch",
               "expected_behavior": "Pass campaign_name Nexd reviewer demo and two creatives with the requested names, sizes and template ID. Report dry_run=true, creative_count=2, the planned steps and any warnings. Create no campaign or creatives."
+            },
+            {
+              "description": "Plan six placements that share artwork and have distinct click trackers. Check how the skill proposes to build the batch.",
+              "prompt": "Show me the plan only for a new campaign called Field Notes. We have no existing draft. The six placement names are Elm, Ash, Oak, Pine, Fir and Yew. All six use the same 300x250 Carousel C15WF6. Use https://assets.example/front.jpg first, https://assets.example/side.jpg second and https://assets.example/detail.jpg third. Each placement has its own global click tracker at https://measure.example/click/ followed by its lowercase name, for example https://measure.example/click/elm. Show how you would build the placements and which tracker goes on each.",
+              "tools_triggered": "nexd_plan_creative_batch",
+              "expected_behavior": "Dry-run all six named placements. The planner returns six create steps. The skill proposes building Elm once with the shared artwork, then making five named copies once the artwork is ready. Count Elm among the six deliverables. List each placement with its own global click tracker and plan to verify it on that creative. End after showing the plan, with zero writes or publish calls."
+            },
+            {
+              "description": "Identify two tracker gaps in a fictional media plan during a dry run. All review inputs are in the prompt.",
+              "prompt": "Plan three 300x250 Carousel C15WF6 placements in a new campaign called Paper Kite. The plan lists placement 001 (Morning), 002 (Noon), then 003 (Evening). Each requires a global impression tracker and a global click tracker. The tracker sheet lists 003 first, with https://measure.example/imp/003 and a blank click cell. Next is 001, with https://measure.example/imp/001 and https://measure.example/click/001. Show the planned placements and tracker coverage only.",
+              "tools_triggered": "nexd_plan_creative_batch",
+              "expected_behavior": "Dry-run all three placements and report source coverage of 1/3 complete in plan order. Match both URLs to 001, identify the missing tracker row for 002, and flag only the missing click tracker for 003. Preserve the supplied URLs and leading zeros. Leave missing values unresolved and end at the plan without writing or publishing."
             },
             {
               "description": "Create a new campaign and an unpublished fixed-size draft in the dedicated sample workspace. Use a fresh campaign for each run.",
@@ -95,7 +143,7 @@
       },
       "publication": {
         "countries": [],
-        "release_notes": "Initial release. Find rich media templates, plan creative sizes, create campaign drafts, preview ads, and publish approved creatives through a connected Nexd account. Includes a skill guiding creative production from brief to publication."
+        "release_notes": "Adds in-chat guidance for editing hotspot pin motion and visibility, video playback, closing behaviour, and backdrop settings while preserving other hotspots."
       }
     }
   }

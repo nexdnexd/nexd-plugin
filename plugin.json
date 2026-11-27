@@ -1,6 +1,6 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
-  "name": "nexd",
+  "name": "Nexd Ads",
   "version": "0.4.2",
   "description": "Create, preview, and publish rich media ads in Nexd Campaign Manager.",
   "author": {
@@ -19,7 +19,7 @@
   "extensions": {
     "com.openai": {
       "interface": {
-        "displayName": "Nexd",
+        "displayName": "Nexd Ads",
         "shortDescription": "Create and preview rich media",
         "longDescription": "Use your existing Nexd account to turn a creative brief into rich media ads. Find a layout, see which images or videos it needs, and plan versions in different sizes. Build placements from a media plan, match trackers by placement ID, and check the saved tracking before publishing. Preview your drafts and confirm which creatives to publish to Nexd Campaign Manager.",
         "developerName": "Nexd",
